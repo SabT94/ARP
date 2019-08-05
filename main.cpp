@@ -25,7 +25,6 @@ typedef struct ETH{
 
 
 int main(int argc, char* argv[]) {
-    printf("%d\n",argc);
     /*if (argc != 2) {
         usage();
         return -1;
@@ -74,7 +73,6 @@ int main(int argc, char* argv[]) {
             for(pcap_addr_t *a=d->addresses; a!=NULL; a=a->next) {
                 if(a->addr->sa_family == AF_INET)
                     myip=inet_ntoa(((struct sockaddr_in*)a->addr)->sin_addr);
-
             }
         }
 
@@ -102,7 +100,7 @@ int main(int argc, char* argv[]) {
     //My ip End//
     //my_mac
     //si_int
-    u_int8_t re[42];
+    uint8_t re[42];
     re[0] = 0xff;
     re[1] = 0xff;
     re[2] = 0xff;
@@ -132,7 +130,6 @@ int main(int argc, char* argv[]) {
 
     re[20] = 0x00;
     re[21] = 0x01;
-
 //    re[22] = 0x00;
 //    re[23] = 0x0c;
 //    re[24] = 0x29;
@@ -145,18 +142,31 @@ int main(int argc, char* argv[]) {
 //    re[30] = 0x0a;
 //    re[31] = 0x06;
 
-//    re[32] = 0x00;
-//    re[33] = 0x00;
-//    re[34] = 0x00;
-//    re[35] = 0x00;
-//    re[36] = 0x00;
-//    re[37] = 0x00;
+    re[32] = 0x00;
+    re[33] = 0x00;
+    re[34] = 0x00;
+    re[35] = 0x00;
+    re[36] = 0x00;
+    re[37] = 0x00;
 
-    re[38] = 0x0a;
-    re[39] = 0x01;
-    re[40] = 0x01;
-    re[41] = 0x01;
-//    scanf("%02x%02x%02x%02x",re[38],re[39],re[40],re[41]);
+    char *dest[4];
+    char *temp;
+    char *ptr1 = argv[2];
+    int count = 0;
+    temp=strtok(ptr1,".");
+    while(ptr1 != NULL){
+        dest[count] = ptr1;
+        count++;
+        ptr1 = strtok(NULL,".");
+    }
+    for(int i = 0; i<4; i++){
+        re[38+i] = atoi(dest[i]);
+
+    }
+//    re[38] = 0x0a;
+//    re[39] = 0x01;
+//    re[40] = 0x01;
+//    re[41] = 0x01;
     for(int i = 0;i<6; i++){
         re[i+6] = my_mac[i];//s_mac
         re[i+22] = my_mac[i];//sender_mac
@@ -165,10 +175,9 @@ int main(int argc, char* argv[]) {
         re[i+28] = (uint8_t)si_int[i];//sender_ip
     }
 
-    for(int i = 0;i<6;i++){
-        printf("%02x ",re[i+6]);
-    }
+
     pcap_sendpacket(handle,re,42);
+
 
     putchar('\n');
     int res = pcap_next_ex(handle, &header, &packet);
@@ -184,18 +193,60 @@ int main(int argc, char* argv[]) {
     for(int i = 0;i<6;i++){
         re[i+22] = my_mac[i];
     }
-    for(int i = 0;i<4;i++){
-        re[i+28] = (uint8_t)si_int[i];//sender_ip
-    }
     re[21] = 0x02;
-    re[31] = 0x01;
+//    char *dest[4];
+//    char *temp;
+//    char *ptr1 = argv[2];
+//    int count = 0;
+//    temp=strtok(ptr1,".");
+    char *dest2[4];
+    char *temp2;
+    char *ptr2 = argv[3];
+    temp2=strtok(ptr2,".");
+
+//    while(ptr1 != NULL){
+//        dest[count] = ptr1;
+//        count++;
+//        ptr1 = strtok(NULL,".");
+//    }
+    count = 0;
+    while(ptr2 != NULL){
+        dest2[count] = ptr2;
+        count++;
+        ptr2 = strtok(NULL,".");
+    }
+    for(int i = 0; i<4; i++){
+        re[28+i] = atoi(dest2[i]);
+    }
+//    for(int i = 0; i<4; i++){
+//        re[38+i] = atoi(dest[i]);
+
+//    }
 
 
-
-    while(1){
-        pcap_sendpacket(handle,re,42);
+    putchar('\n');
+    for(int i = 0; i<4; i++){
+        printf("%d",re[i+38]);\
+        if(i!= 3){
+            putchar('.');
+        }
+    }
+    putchar('\n');
+    for(int i = 0; i<4; i++){
+        printf("%d",re[i+28]);\
+        if(i!= 3){
+            putchar('.');
+        }
     }
 
+    putchar('\n');
+    pcap_sendpacket(handle,re,42);
+
+
+
+//    while(1){
+//        pcap_sendpacket(handle,re,42);
+//    }
 
     return 0;
 }
